@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Customer Service Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .chat-container {
+            width: 50%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        .user-message {
+            color: blue;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .bot-message {
+            color: green;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .input-container {
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2>AI Customer Service Chatbot</h2>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="user_input" placeholder="Type a message..." autofocus>
+            <button id="send_btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("send_btn").addEventListener("click", sendMessage);
+        document.getElementById("user_input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevents a new line in input
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            let userInput = document.getElementById("user_input").value.trim();
+            if (userInput === "") return;
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="user-message">You: ${userInput}</div>`;
+
+            fetch("/chat", {
+                method: "POST",
+                body: JSON.stringify({ message: userInput }), // ✅ Send JSON format
+                headers: { "Content-Type": "application/json" } // ✅ Correct header
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += `<div class="bot-message">Bot: ${data.response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; // Auto scroll to bottom
+            })
+            .catch(error => {
+                chatBox.innerHTML += `<div class="error-message">Error: Failed to get response.</div>`;
+                console.error("Error:", error);
+            });
+
+            document.getElementById("user_input").value = ""; // Clear input box
+        }
+    </script>
+
+</body>
+</html>
